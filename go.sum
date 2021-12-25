@@ -1,0 +1,10 @@
+github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 h1:DACJavvAHhabrF08vX0COfcOBJRhZ8lUbR+ZWIs0Y5g=
+github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
+github.com/vecno-io/go-magi v0.0.0-20210928143535-8febc0f526ad h1:OJ48zR9fYYEiz+OqO8vjN2BI6MxvsfG2GecOKhlzbxU=
+github.com/vecno-io/go-magi v0.0.0-20210928143535-8febc0f526ad/go.mod h1:GK/fRj1/yjmJ2jd3QEU34L9FQ4rTO0h7d0L/DYQrpWI=
+github.com/vecno-io/go-magi v1.0.0 h1:mQWhCn5oRQSe5kHDhaIhmKJkFNAiv/7StQgItx+2yeU=
+github.com/vecno-io/go-magi v1.0.0/go.mod h1:dA1qyLnW3kZMpSCmKD0gfh7YKgU2C8BxSQqIbpWKU58=
+golang.org/x/image v0.0.0-20211028202545-6944b10bf410 h1:hTftEOvwiOq2+O8k2D5/Q7COC7k5Qcrgc2TFURJYnvQ=
+golang.org/x/image v0.0.0-20211028202545-6944b10bf410/go.mod h1:023OzeP/+EPmXeapQh35lcL3II3LrY8Ic+EFFKVhULM=
+golang.org/x/text v0.3.6/go.mod h1:5Zoc/QRtKVWzQhOtBMvqHzDpF6irO9z98xDceosuGiQ=
+golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
