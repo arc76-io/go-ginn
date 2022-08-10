@@ -9,6 +9,14 @@ import (
 type Diagonal int
 type Direction int
 
+type Stats struct {
+	Base		uint32	`json:"base"`
+	Core		uint32	`json:"core"`
+	Nano		uint32	`json:"nano"`
+	Micro		uint32	`json:"micro"`
+	Active	uint32	`json:"active"`
+}
+
 const (
 	DiagonalPosQ Diagonal = iota
 	DiagonalNegR Diagonal = iota

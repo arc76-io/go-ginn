@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"image"
 	"math"
-	"math/rand"
 
 	"github.com/vecno-io/go-magi"
+
+	xor "github.com/vecno-io/arc-gfx/shifts"
 )
 
 type Point struct {
@@ -34,7 +35,7 @@ type Setup struct {
 }
 
 type NeuronMap struct {
-	rng *rand.Rand
+	rng *xor.Shift64
 
 	setup  *Setup
 	layout *Layout
@@ -72,7 +73,7 @@ func NewNeuronMap(center Vec2, cfg Setup) *NeuronMap {
 		Y: float64(height) * 0.5,
 	}
 	ref := &NeuronMap{
-		rng:  rand.New(rand.NewSource(int64(cfg.Seed))),
+		rng: xor.NewShift64(cfg.Seed),
 
 		setup: &cfg,
 		layout: layout,
@@ -115,12 +116,12 @@ func NewNeuronMap(center Vec2, cfg Setup) *NeuronMap {
 		}
 	}
 	// 3. Select a random root node
-	rx := int(width / 8);
-	ry := int(height / 8);
-	rx = ref.rng.Intn(rx) - (rx/2)
-	ry = ref.rng.Intn(ry) - (ry/2)
+	rx := width / 4;
+	ry := height / 4;
+	rx = ref.rng.Int32(rx) - (rx/2)
+	ry = ref.rng.Int32(ry) - (ry/2)
 
-	ref.root = ref.slice[int(width/2) + rx][int(height/2) + ry]
+	ref.root = ref.slice[int((width/2) + rx)][int((height/2) + ry)]
 	ref.list = append(ref.list, ref.root)
 	ref.root.value = 2.2
 
@@ -146,8 +147,8 @@ func (ref *NeuronMap) Generate() {
 		// 2.1  goto: 1
 		for (ref.setup.MinRadius > ds) && int(ref.setup.MaxChecks) > rn {
 			rn++
-			x := ref.rng.Intn(int(ref.size.X))
-			y := ref.rng.Intn(int(ref.size.Y))
+			x := ref.rng.Int32(ref.size.X)
+			y := ref.rng.Int32(ref.size.Y)
 			na = ref.slice[x][y]
 			nb, ds = ref.findNearest(na)
 		}
@@ -165,7 +166,11 @@ func (ref *NeuronMap) Generate() {
 		// 4.1.1  add node and link up
 		if ref.isInRange(na.point) && ref.setup.MinRadius <= ds {
 			ref.list = append(ref.list, na)
-			na.value = 0.3
+			if (rn % 2) > 0 {
+				na.value = 0.4
+			} else {
+				na.value = 0.2
+			}
 		}
 	}
 	// 5   For wanted active points
@@ -177,7 +182,7 @@ func (ref *NeuronMap) Generate() {
 	er := ref.setup.AvrRadius * 2.0
 	cn := min(ref.setup.Count, int32(ref.setup.Iterations / 2))
 	for rn < int(cn) && tn < int(ref.setup.MaxChecks) {
-		ix := ref.rng.Intn(ln)
+		ix := ref.rng.Int32(int32(ln))
 		na := ref.list[ix]
 		_, ds := ref.findNearestActive(na)
 		if er < ds && na.value < 0.7 {
@@ -189,7 +194,7 @@ func (ref *NeuronMap) Generate() {
 	rn = 0
 	tn = 0
 	for rn < int(cn) && tn < int(ref.setup.MaxChecks) {
-		ix := ref.rng.Intn(ln)
+		ix := ref.rng.Int32(int32(ln))
 		na := ref.list[ix]
 		_, ds := ref.findNearestActive(na)
 		if er < ds && na.value < 1.4 {
@@ -211,25 +216,39 @@ func (ref *NeuronMap) Generate() {
 	}
 }
 
-func (ref *NeuronMap) Render(size Point, dc *magi.Context, ps, pm, pl, px image.Image) {
+func (ref *NeuronMap) Stats() *Stats {
+	s := &Stats{
+		Active: uint32(len(ref.list)),
+	}
+	for _, n := range ref.list {
+		if (n.value < 0.3) {
+			s.Nano += 1
+		} else if (n.value < 0.7) {
+			s.Micro += 1
+		} else if (n.value < 1.4) {
+			s.Base += 1
+		} else if (n.value < 2.1) {
+			s.Core += 1
+		}
+	}
+	return s
+}
+func (ref *NeuronMap) Render(size Point, dc *magi.Context, pn, ps, pm, pl, px image.Image) {
 	for _, n := range ref.list {
 		dc.Push()
 		x := n.point.X + ((size.X - ref.size.X) / 2)
 		y := n.point.Y + ((size.Y - ref.size.Y) / 2)
-		if (n.value < 0.7) {
-			//dc.DrawImage(ps, int(x), int(y))
+		if (n.value < 0.3) {
+			dc.DrawImageAnchored(pn, int(x), int(y), 0.5, 0.5)
+		} else if (n.value < 0.7) {
 			dc.DrawImageAnchored(ps, int(x), int(y), 0.5, 0.5)
 		} else if (n.value < 1.4) {
-			//dc.DrawImage(pm, int(x), int(y))
 			dc.DrawImageAnchored(pm, int(x), int(y), 0.5, 0.5)
 		} else if (n.value < 2.1) {
-			//dc.DrawImage(pl, int(x), int(y))
 			dc.DrawImageAnchored(pl, int(x), int(y), 0.5, 0.5)
 		} else {
-			//dc.DrawImage(px, int(x), int(y))
 			dc.DrawImageAnchored(px, int(x), int(y), 0.5, 0.5)
 		}
-
 		dc.Pop()
 	}
 }
@@ -282,10 +301,6 @@ func (ref *NeuronMap) findNearest(to *Neuron) (*Neuron, float64) {
 		}
 	}
 	return nc, dc
-}
-
-func (ref *NeuronMap) addNeuron(n *Neuron) {
-
 }
 
 func (ref *NeuronMap) getDistance(from *Neuron, to *Neuron) float64 {
