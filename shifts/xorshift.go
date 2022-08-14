@@ -31,8 +31,8 @@ func (ref *Shift64) shift() int64 {
 }
 
 func (ref *Shift64) Int32(n int32) int32 {
-	x := float64(ref.shift()) / (1 << 63)
-	return int32(math.Abs(x * float64(n)) - 1)
+	x := float64(ref.shift()) / 9223372036854775808
+	return int32(math.Abs(x * float64(n)) - 1.0)
 }
 
 func GetSeed(str string) int64 {

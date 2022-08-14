@@ -24,7 +24,6 @@ type Sector struct {
 }
 
 type JsonSector struct {
-	Type		string			`json:"type"`
 	Token		string			`json:"token"`
 	Stats 	*hexa.Stats `json:"stats"`
 }
@@ -118,7 +117,6 @@ func CreateCluster(token_id string) *Sector {
 
 func (ref *Sector) Json() []byte  {
 	data := JsonSector{
-		Type: ref.title,
 		Token: ref.token,
 		Stats: ref.hexmap.Stats(),
 	}
