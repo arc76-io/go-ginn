@@ -24,6 +24,22 @@ type JsonData struct {
 	Refrence_hash	string	`json:"refrence_hash"`
 }
 
+type JsonRarity struct {
+	Base	map[uint32][]string	`json:"base"`
+	Core	map[uint32][]string	`json:"core"`
+	Micro	map[uint32][]string	`json:"micro"`
+	Nano	map[uint32][]string	`json:"nano"`
+	Active	map[uint32][]string	`json:"active"`
+}
+
+var rarity = &JsonRarity {
+	Base: make(map[uint32][]string),
+	Core: make(map[uint32][]string),
+	Micro: make(map[uint32][]string),
+	Nano: make(map[uint32][]string),
+	Active: make(map[uint32][]string),
+} 
+
 func main() {
 	// // SEC-L1-P0.P0
 	l1 := tileKey(0, 0)
@@ -38,8 +54,10 @@ func main() {
 	// TODO IPFS Uploads
 	writeJson(title, sc)
 	writeData(title)
-	
+	addStats(sc)
+
 	buildRegion(l1)
+	writeStats()
 }
 
 func hashFile(file string) string {
@@ -91,6 +109,22 @@ func writeJson(title string, sc *sector.Sector) {
 	fl.Sync()
 }
 
+func writeStats() {
+	fl, err := os.Create("./out/rarity.json")
+	if err != nil {
+		panic(err)
+	}
+	defer fl.Close()
+	js, err := json.MarshalIndent(rarity, "", " ")
+	if err != nil {
+		panic(err)
+	}
+	if _, err := fl.Write(js); err != nil {
+		panic(err)
+	}
+	fl.Sync()
+}
+
 func buildRegion(l1 string) {
 	// SEC-L2-P0.P0:PX.PX
 	for q := int32(-2); q <= 2; q++ {
@@ -109,6 +143,7 @@ func buildRegion(l1 string) {
 			// TODO IPFS Uploads
 			writeJson(title, sc)
 			writeData(title)
+			addStats(sc)
 
 			buildCluster(l1, l2)
 		}
@@ -133,8 +168,19 @@ func buildCluster(l1, l2 string) {
 			// TODO IPFS Uploads
 			writeJson(title, sc)
 			writeData(title)
+			addStats(sc)
 		}
 	}
+}
+
+func addStats(sc *sector.Sector) {
+	data := sc.Data()
+
+	rarity.Base[data.Stats.Base] = append(rarity.Base[data.Stats.Base], data.Token)
+	rarity.Core[data.Stats.Core] = append(rarity.Core[data.Stats.Core], data.Token)
+	rarity.Micro[data.Stats.Micro] = append(rarity.Micro[data.Stats.Micro], data.Token)
+	rarity.Nano[data.Stats.Nano] = append(rarity.Nano[data.Stats.Nano], data.Token)
+	rarity.Active[data.Stats.Active] = append(rarity.Active[data.Stats.Active], data.Token)
 }
 
 func abs(x int32) int32 {

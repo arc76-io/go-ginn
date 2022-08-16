@@ -116,6 +116,12 @@ func CreateCluster(token_id string) *Sector {
 		}
 }
 
+func (ref *Sector) Data() JsonSector  {
+	return JsonSector{
+		Token: ref.token,
+		Stats: ref.hexmap.Stats(),
+	}
+}
 func (ref *Sector) Json() []byte  {
 	data := JsonSector{
 		Token: ref.token,
