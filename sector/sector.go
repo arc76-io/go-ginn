@@ -3,6 +3,7 @@ package sector
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image/png"
 	"log"
 
@@ -193,13 +194,40 @@ func (ref *Sector) Render(dc *magi.Context) *bytes.Buffer  {
 	sx := float64(CardWidth / 2.0)
 	sy := float64(CardHeight / 2.0)
 
+	ss := float64(CardWidth / 5.0)
+
 	dc.Push()
 	if err := dc.LoadFontFace("assets/font/salvar.ttf", 96); err != nil {
 		panic(err)
 	}
 	dc.SetRGBA(1.0, 0.95, 1.0, 0.90)
 	// dc.DrawStringAnchored(cat, px, py, 0.5, -19.5) // 64
-	dc.DrawStringAnchored(ref.title, sx, sy, 0.5, -11.6)
+	dc.DrawStringAnchored(ref.title, sx, sy, 0.5, -11.725)
+	dc.Pop()
+
+	// Draw attrib tags
+	dc.Push()
+	if err := dc.LoadFontFace("assets/font/hacked.ttf", 32); err != nil {
+		panic(err)
+	}	
+	dc.SetRGBA(1.0, 0.95, 1.0, 0.80)
+	dc.DrawStringAnchored("Base", ss * 1, sy, 0.5, 35.6)
+	dc.DrawStringAnchored("Core", ss * 2, sy, 0.5, 35.6)
+	dc.DrawStringAnchored("Micro", ss * 3, sy, 0.5, 35.6)
+	dc.DrawStringAnchored("Nano", ss * 4, sy, 0.5, 35.6)
+	dc.Pop()
+
+	stats := ref.hexmap.Stats()
+	// Draw attrib values
+	dc.Push()
+	if err := dc.LoadFontFace("assets/font/hacked.ttf", 48); err != nil {
+		panic(err)
+	}	
+	dc.SetRGBA(1.0, 0.95, 1.0, 0.80)
+	dc.DrawStringAnchored(fmt.Sprintf("%03d", stats.Base), ss * 1, sy, 0.5, 25.1)
+	dc.DrawStringAnchored(fmt.Sprintf("%03d", stats.Core), ss * 2, sy, 0.5, 25.1)
+	dc.DrawStringAnchored(fmt.Sprintf("%03d", stats.Micro), ss * 3, sy, 0.5, 25.1)
+	dc.DrawStringAnchored(fmt.Sprintf("%03d", stats.Nano), ss * 4, sy, 0.5, 25.1)
 	dc.Pop()
 
 	buff := bytes.NewBuffer([]byte{})
