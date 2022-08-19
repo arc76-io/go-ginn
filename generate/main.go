@@ -10,7 +10,9 @@ import (
 	"os"
 
 	"github.com/vecno-io/arc-gfx/sector"
+
 	"github.com/vecno-io/go-magi"
+	imaging "github.com/vecno-io/go-magin"
 )
 
 // SEC-L1-P0.P0
@@ -50,6 +52,7 @@ func main() {
 	sc := sector.CreateGuild(title)
 	sc.Render(dc)
 	dc.SavePNG(fmt.Sprintf("./out/%s.png", title))
+	scaleImage(title)
 
 	// TODO IPFS Uploads
 	writeJson(title, sc)
@@ -73,6 +76,28 @@ func hashFile(file string) string {
   }
 
   return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func scaleImage(title string) {
+	path := fmt.Sprintf("./out/%s.png", title)
+	srcImage, err := imaging.Open(path)
+	if err != nil {
+		log.Fatalf("failed to open image: %v", err)
+	}
+
+	dst1024 := imaging.Resize(srcImage, 1024, 1024, imaging.Lanczos)
+	path = fmt.Sprintf("./out/1024/%s.png", title)
+	err = imaging.Save(dst1024, path)
+	if err != nil {
+		log.Fatalf("failed to save image: %v", err)
+	}
+
+	dst512 := imaging.Resize(srcImage, 512, 512, imaging.Lanczos)
+	path = fmt.Sprintf("./out/512/%s.png", title)
+	err = imaging.Save(dst512, path)
+	if err != nil {
+		log.Fatalf("failed to save image: %v", err)
+	}
 }
 
 func writeData(title string) {
@@ -139,6 +164,7 @@ func buildRegion(l1 string) {
 			sc := sector.CreateRegion(title)
 			sc.Render(dc)
 			dc.SavePNG(fmt.Sprintf("./out/%s.png", title))
+			scaleImage(title)
 
 			// TODO IPFS Uploads
 			writeJson(title, sc)
@@ -164,6 +190,7 @@ func buildCluster(l1, l2 string) {
 			sc := sector.CreateCluster(title)
 			sc.Render(dc)
 			dc.SavePNG(fmt.Sprintf("./out/%s.png", title))
+			scaleImage(title)
 
 			// TODO IPFS Uploads
 			writeJson(title, sc)
